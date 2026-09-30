@@ -1,10 +1,14 @@
-import { getJokes, type Joke } from "@/lib/supabase";
+import Link from "next/link";
+import { getJokes, type Joke } from "@/lib/jokes";
+import { getCurrentUser } from "@/lib/auth";
 
 // Render on every request so newly added Supabase rows show up without a
 // redeploy. Valid here because Cache Components is not enabled in next.config.ts.
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const user = await getCurrentUser();
+
   let jokes: Joke[] = [];
   let error: string | null = null;
 
@@ -16,11 +20,19 @@ export default async function Home() {
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
-      <header className="mb-10">
-        <h1 className="text-4xl font-bold tracking-tight">Humor Project</h1>
-        <p className="mt-2 text-sm opacity-70">
-          Jokes served from a Supabase table.
-        </p>
+      <header className="mb-10 flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight">Humor Project</h1>
+          <p className="mt-2 text-sm opacity-70">
+            Jokes served from a Supabase table.
+          </p>
+        </div>
+        <Link
+          href={user ? "/jokes/new" : "/login"}
+          className="shrink-0 rounded-lg border border-black/15 px-4 py-2 text-sm font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+        >
+          {user ? "Add a joke" : "Sign in to add"}
+        </Link>
       </header>
 
       {error ? (
@@ -41,11 +53,18 @@ export default async function Home() {
               key={joke.id}
               className="rounded-lg border border-black/10 p-5 dark:border-white/15"
             >
-              {joke.category && (
-                <span className="text-xs font-medium uppercase tracking-wide opacity-60">
-                  {joke.category}
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {joke.category && (
+                  <span className="text-xs font-medium uppercase tracking-wide opacity-60">
+                    {joke.category}
+                  </span>
+                )}
+                {joke.user_id && (
+                  <span className="rounded bg-black/5 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide opacity-60 dark:bg-white/10">
+                    Community
+                  </span>
+                )}
+              </div>
               <p className="mt-1 font-medium">{joke.setup}</p>
               <p className="mt-2 opacity-75">{joke.punchline}</p>
             </li>
