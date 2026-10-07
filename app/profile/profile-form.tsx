@@ -26,7 +26,12 @@ export function ProfileForm({
   );
 
   const [preview, setPreview] = useState<string | null>(profile?.avatar_url ?? null);
-  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? "");
+  // Starts empty on purpose, and is only filled by a successful upload below.
+  // Seeding it from profile.avatar_url would post the existing value straight
+  // back, and an avatar seeded from Google by the auth.users trigger is not a
+  // URL in our Storage bucket - the action would reject it and block the save.
+  // Left blank, the action keeps whatever avatar the profile already has.
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
