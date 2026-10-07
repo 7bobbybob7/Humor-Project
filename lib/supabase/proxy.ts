@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /** Paths that require a signed-in user. */
-const PROTECTED_PREFIXES = ["/profile", "/onboarding", "/jokes/new"];
+const PROTECTED_PREFIXES = ["/profile", "/onboarding", "/jokes/new", "/generate"];
 
 /**
  * Refreshes the auth cookie on every request and gates protected routes.

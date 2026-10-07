@@ -19,8 +19,8 @@ export async function Nav() {
         <div className="flex items-center gap-4 text-sm">
           {user ? (
             <>
-              <Link href="/jokes/new" className="hover:underline">
-                Add a joke
+              <Link href="/generate" className="hover:underline">
+                Generate
               </Link>
               <Link href="/profile" className="flex items-center gap-2 hover:underline">
                 <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-black/5 text-xs font-semibold dark:border-white/15 dark:bg-white/10">
