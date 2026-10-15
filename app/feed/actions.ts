@@ -25,6 +25,20 @@ export async function castVote(
 
   if (!user) return { error: "You must be signed in to vote." };
 
+  // Nobody rates their own caption - the standings would be trivial to game.
+  // The RLS policy enforces this too; this check exists to return a readable
+  // message instead of a raw policy violation.
+  const { data: target } = await supabase
+    .from("generations")
+    .select("user_id")
+    .eq("id", generationId)
+    .maybeSingle();
+
+  if (!target) return { error: "That caption no longer exists." };
+  if (target.user_id === user.id) {
+    return { error: "You can't vote on your own caption." };
+  }
+
   // RLS limits this read to the caller's own vote.
   const { data: existing } = await supabase
     .from("votes")

@@ -22,12 +22,14 @@ export function CaptionCard({
   signedIn,
   rank,
   leading = false,
+  isMine = false,
 }: {
   generation: Generation;
   myVote: number | undefined;
   signedIn: boolean;
   rank?: number;
   leading?: boolean;
+  isMine?: boolean;
 }) {
   return (
     <li
@@ -35,12 +37,23 @@ export function CaptionCard({
         leading ? "bg-yellow-tint ring-4 ring-comic-yellow" : ""
       }`}
     >
-      <VoteButtons
-        generationId={generation.id}
-        score={generation.score}
-        myVote={myVote}
-        signedIn={signedIn}
-      />
+      {isMine ? (
+        <div className="flex w-9 shrink-0 flex-col items-center gap-1.5">
+          <span className="font-display text-lg font-black tabular-nums">
+            {generation.score}
+          </span>
+          <span className="text-center text-[10px] font-semibold leading-tight text-ink-soft">
+            yours
+          </span>
+        </div>
+      ) : (
+        <VoteButtons
+          generationId={generation.id}
+          score={generation.score}
+          myVote={myVote}
+          signedIn={signedIn}
+        />
+      )}
 
       <div className="min-w-0 flex-1">
         {leading && (

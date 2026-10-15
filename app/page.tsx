@@ -140,6 +140,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     myVote={myVotes[generation.id]}
                     signedIn={Boolean(user)}
                     leading={generation.id === leadingId}
+                    isMine={Boolean(profile) && generation.user_id === profile!.id}
                     rank={active === "top" ? i : undefined}
                   />
                 ))}
