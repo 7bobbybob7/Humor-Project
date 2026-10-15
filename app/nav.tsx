@@ -40,7 +40,12 @@ export async function Nav() {
                 <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-ink bg-comic-blue text-xs font-bold text-white">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element -- user-supplied Storage URL
-                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     (profile?.first_name?.[0] ?? user.email?.[0] ?? "?").toUpperCase()
                   )}

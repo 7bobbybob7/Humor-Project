@@ -93,7 +93,12 @@ export function ProfileForm({
         <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-ink bg-comic-blue text-xl font-black text-white">
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- user-supplied Storage URL; no optimization needed for a small avatar
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            <img
+              src={preview}
+              alt=""
+              referrerPolicy="no-referrer"
+              className="h-full w-full object-cover"
+            />
           ) : (
             (profile?.first_name?.[0] ?? email[0] ?? "?").toUpperCase()
           )}
