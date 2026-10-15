@@ -57,5 +57,5 @@ export async function generate(
   if (error) return { error: `Could not save the captions: ${error.message}` };
 
   revalidatePath("/");
-  redirect("/?sort=new");
+  redirect(`/?sort=new&posted=${result.captions.length}`);
 }

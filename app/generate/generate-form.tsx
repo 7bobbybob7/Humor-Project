@@ -13,7 +13,7 @@ export function GenerateForm({ theme }: { theme: string }) {
   return (
     <form action={formAction} className="space-y-5">
       <label className="block text-sm">
-        <span className="mb-1 block font-medium">Topic</span>
+        <span className="mb-1.5 block font-display text-base font-bold">Topic</span>
         <input
           name="topic"
           value={topic}
@@ -21,9 +21,9 @@ export function GenerateForm({ theme }: { theme: string }) {
           required
           maxLength={120}
           placeholder={theme}
-          className="w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"
+          className="w-full rounded-xl border-2 border-ink bg-paper-raised px-4 py-3 text-base font-medium placeholder:text-ink-soft/60 focus:outline-none focus:ring-4 focus:ring-comic-yellow"
         />
-        <span className="mt-1 block text-xs opacity-60">
+        <span className="mt-1.5 block text-xs text-ink-soft">
           Anything goes — a place, a feeling, a very specific inconvenience.
         </span>
       </label>
@@ -31,13 +31,13 @@ export function GenerateForm({ theme }: { theme: string }) {
       <button
         type="button"
         onClick={() => setTopic(theme)}
-        className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium transition hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+        className="rounded-full border-2 border-ink bg-yellow-tint px-3 py-1.5 text-xs font-bold transition hover:bg-comic-yellow hover:text-ink-fixed"
       >
         Use today&apos;s theme: {theme}
       </button>
 
       {state.error && (
-        <p className="rounded-lg border border-red-500/40 bg-red-500/5 p-3 text-sm text-red-600 dark:text-red-400">
+        <p className="panel-sm bg-red-tint px-4 py-3 text-sm font-semibold">
           {state.error}
         </p>
       )}
@@ -45,13 +45,13 @@ export function GenerateForm({ theme }: { theme: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="block rounded-lg bg-foreground px-5 py-2.5 font-medium text-background transition hover:opacity-90 disabled:opacity-60"
+        className="press panel-sm block bg-comic-red px-6 py-3 font-bold text-white disabled:opacity-60"
       >
         {pending ? "Writing…" : "Generate 3 captions"}
       </button>
 
       {pending && (
-        <p className="text-sm opacity-60">
+        <p className="text-sm text-ink-soft">
           Asking the model for three takes on it. Usually a few seconds.
         </p>
       )}

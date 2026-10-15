@@ -49,7 +49,16 @@ export async function updateProfile(
     })
     .eq("id", user.id);
 
-  if (error) return { error: `Could not save profile: ${error.message}` };
+  if (error) {
+    console.error("[profile update failed]", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      userId: user.id,
+    });
+    return { error: `Could not save profile: ${error.message}` };
+  }
 
   revalidatePath("/profile");
   revalidatePath("/");

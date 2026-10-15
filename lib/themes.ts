@@ -26,3 +26,13 @@ export function themeForToday(now = new Date()): string {
   const day = Math.floor(now.getTime() / 86_400_000);
   return THEMES[day % THEMES.length];
 }
+
+/** Hours until the theme rotates, for the "come back tomorrow" nudge. */
+export function hoursUntilNextTheme(now = new Date()): number {
+  const nextMidnightUtc = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+  );
+  return Math.max(1, Math.ceil((nextMidnightUtc - now.getTime()) / 3_600_000));
+}

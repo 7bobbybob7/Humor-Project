@@ -10,17 +10,31 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+const RANK_STYLES = [
+  "bg-comic-yellow text-ink-fixed",
+  "bg-blue-tint text-ink",
+  "bg-red-tint text-ink",
+];
+
 export function CaptionCard({
   generation,
   myVote,
   signedIn,
+  rank,
+  leading = false,
 }: {
   generation: Generation;
   myVote: number | undefined;
   signedIn: boolean;
+  rank?: number;
+  leading?: boolean;
 }) {
   return (
-    <li className="flex gap-4 rounded-lg border border-black/10 p-5 dark:border-white/15">
+    <li
+      className={`panel panel-hover flex gap-4 p-4 sm:p-5 ${
+        leading ? "bg-yellow-tint ring-4 ring-comic-yellow" : ""
+      }`}
+    >
       <VoteButtons
         generationId={generation.id}
         score={generation.score}
@@ -29,19 +43,34 @@ export function CaptionCard({
       />
 
       <div className="min-w-0 flex-1">
-        <p className="font-medium">{generation.caption}</p>
+        {leading && (
+          <span className="mb-2 mr-2 inline-block rounded-full border-2 border-ink bg-comic-red px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white">
+            Out in front
+          </span>
+        )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs opacity-60">
-          <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/10">
+        {rank !== undefined && rank < 3 && (
+          <span
+            className={`mb-2 inline-block rounded-full border-2 border-ink px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide ${RANK_STYLES[rank]}`}
+          >
+            No. {rank + 1}
+          </span>
+        )}
+
+        <p className="font-display text-lg font-bold leading-snug break-words sm:text-xl">
+          {generation.caption}
+        </p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-soft">
+          <span className="max-w-full truncate rounded-full bg-yellow-tint px-2.5 py-1 font-semibold text-ink">
             {generation.prompt}
           </span>
-          <span>·</span>
-          <span>{generation.author_first_name ?? "someone"}</span>
-          <span>·</span>
+          <span className="font-medium">by {generation.author_first_name ?? "someone"}</span>
+          <span aria-hidden>·</span>
           <span>{timeAgo(generation.created_at)}</span>
-          <span>·</span>
-          <span>
-            ▲{generation.up_votes} ▼{generation.down_votes}
+          <span aria-hidden>·</span>
+          <span className="tabular-nums">
+            {generation.up_votes} up / {generation.down_votes} down
           </span>
         </div>
       </div>

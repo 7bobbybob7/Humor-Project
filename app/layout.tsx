@@ -1,32 +1,41 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import { Nav } from "./nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Fraunces is the newspaper-funnies voice: a soft, slightly wonky serif.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Humor Project",
-  description: "Jokes served from a Supabase table.",
+  title: "The Humor Project",
+  description:
+    "A daily caption contest. The robots write, you decide what's funny.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col bg-paper text-ink">
         <Nav />
         {children}
+        <footer className="mt-16 border-t-2 border-ink/15 py-8">
+          <p className="mx-auto max-w-3xl px-6 text-center text-xs text-ink-soft">
+            The Humor Project · captions written by AI, ranked by humans
+          </p>
+        </footer>
       </body>
     </html>
   );

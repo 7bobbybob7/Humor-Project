@@ -10,20 +10,34 @@ export async function Nav() {
     .join(" ");
 
   return (
-    <header className="border-b border-black/10 dark:border-white/15">
-      <nav className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-6 py-4">
-        <Link href="/" className="font-semibold tracking-tight">
-          Humor Project
+    <header className="sticky top-0 z-30 border-b-2 border-ink bg-paper/95 backdrop-blur">
+      <nav className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-5 py-3">
+        <Link href="/" className="group flex items-baseline gap-2">
+          <span className="font-display text-xl font-black tracking-tight sm:text-2xl">
+            The Humor Project
+          </span>
+          <span
+            aria-hidden
+            className="hidden h-2 w-2 rounded-full bg-comic-red transition group-hover:bg-comic-blue sm:block"
+          />
         </Link>
 
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-2 text-sm sm:gap-3">
           {user ? (
             <>
-              <Link href="/generate" className="hover:underline">
-                Generate
+              <Link
+                href="/generate"
+                className="press panel-sm pill bg-comic-yellow px-3.5 py-1.5 font-bold text-ink-fixed"
+              >
+                + Write
               </Link>
-              <Link href="/profile" className="flex items-center gap-2 hover:underline">
-                <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-black/5 text-xs font-semibold dark:border-white/15 dark:bg-white/10">
+
+              <Link
+                href="/profile"
+                title="Your profile"
+                className="flex items-center gap-2 rounded-full p-0.5 pr-2 transition hover:bg-ink/5"
+              >
+                <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-ink bg-comic-blue text-xs font-bold text-white">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element -- user-supplied Storage URL
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -31,10 +45,16 @@ export async function Nav() {
                     (profile?.first_name?.[0] ?? user.email?.[0] ?? "?").toUpperCase()
                   )}
                 </span>
-                {displayName || "Profile"}
+                <span className="hidden font-semibold sm:inline">
+                  {displayName || "Profile"}
+                </span>
               </Link>
-              <form action="/auth/signout" method="post">
-                <button type="submit" className="opacity-70 hover:opacity-100 hover:underline">
+
+              <form action="/auth/signout" method="post" className="hidden sm:block">
+                <button
+                  type="submit"
+                  className="text-ink-soft underline-offset-2 transition hover:text-ink hover:underline"
+                >
                   Sign out
                 </button>
               </form>
@@ -42,7 +62,7 @@ export async function Nav() {
           ) : (
             <Link
               href="/login"
-              className="rounded-lg border border-black/15 px-3 py-1.5 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+              className="press panel-sm pill bg-comic-red px-4 py-1.5 font-bold text-white"
             >
               Sign in
             </Link>

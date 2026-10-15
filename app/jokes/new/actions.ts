@@ -34,6 +34,6 @@ export async function createJoke(
 
   if (error) return { error: `Could not save joke: ${error.message}` };
 
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath("/jokes");
+  redirect("/jokes");
 }

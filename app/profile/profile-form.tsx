@@ -90,7 +90,7 @@ export function ProfileForm({
       <input type="hidden" name="avatar_url" value={avatarUrl} />
 
       <div className="flex items-center gap-4">
-        <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-black/5 text-xl font-semibold dark:border-white/15 dark:bg-white/10">
+        <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-ink bg-comic-blue text-xl font-black text-white">
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- user-supplied Storage URL; no optimization needed for a small avatar
             <img src={preview} alt="" className="h-full w-full object-cover" />
@@ -100,66 +100,66 @@ export function ProfileForm({
         </span>
 
         <label className="text-sm">
-          <span className="mb-1 block font-medium">Profile photo</span>
+          <span className="mb-1.5 block font-display text-base font-bold">Profile photo</span>
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
             onChange={handleFile}
             disabled={uploading}
-            className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-black/10 file:px-3 file:py-1.5 file:text-sm file:font-medium disabled:opacity-60 dark:file:bg-white/15"
+            className="block w-full text-sm file:mr-3 file:rounded-full file:border-2 file:border-ink file:bg-comic-yellow file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-ink-fixed disabled:opacity-60"
           />
-          <span className="mt-1 block text-xs opacity-60">
+          <span className="mt-1.5 block text-xs text-ink-soft">
             {uploading ? "Uploading…" : "PNG or JPG, up to 5 MB."}
           </span>
         </label>
       </div>
 
       {uploadError && (
-        <p className="rounded-lg border border-red-500/40 bg-red-500/5 p-3 text-sm text-red-600 dark:text-red-400">
+        <p className="panel-sm bg-red-tint px-4 py-3 text-sm font-semibold">
           {uploadError}
         </p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium">First name</span>
+          <span className="mb-1.5 block font-display text-base font-bold">First name</span>
           <input
             name="first_name"
             defaultValue={profile?.first_name ?? ""}
             required
-            className="w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"
+            className="w-full rounded-xl border-2 border-ink bg-paper-raised px-4 py-2.5 font-medium focus:outline-none focus:ring-4 focus:ring-comic-yellow"
           />
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium">Last name</span>
+          <span className="mb-1.5 block font-display text-base font-bold">Last name</span>
           <input
             name="last_name"
             defaultValue={profile?.last_name ?? ""}
             required
-            className="w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"
+            className="w-full rounded-xl border-2 border-ink bg-paper-raised px-4 py-2.5 font-medium focus:outline-none focus:ring-4 focus:ring-comic-yellow"
           />
         </label>
       </div>
 
       <label className="block text-sm">
-        <span className="mb-1 block font-medium">Email</span>
+        <span className="mb-1.5 block font-display text-base font-bold">Email</span>
         <input
           value={email}
           disabled
-          className="w-full rounded-lg border border-black/10 bg-black/5 px-3 py-2 opacity-60 dark:border-white/15 dark:bg-white/5"
+          className="w-full rounded-xl border-2 border-ink/25 bg-ink/5 px-4 py-2.5 text-ink-soft"
         />
-        <span className="mt-1 block text-xs opacity-60">Managed by Google — not editable.</span>
+        <span className="mt-1.5 block text-xs text-ink-soft">Managed by Google — not editable.</span>
       </label>
 
       {state.error && (
-        <p className="rounded-lg border border-red-500/40 bg-red-500/5 p-3 text-sm text-red-600 dark:text-red-400">
+        <p className="panel-sm bg-red-tint px-4 py-3 text-sm font-semibold">
           {state.error}
         </p>
       )}
       {state.success && (
-        <p className="rounded-lg border border-green-600/40 bg-green-600/5 p-3 text-sm text-green-700 dark:text-green-400">
+        <p className="panel-sm bg-green-tint px-4 py-3 text-sm font-semibold">
           {state.success}
         </p>
       )}
@@ -167,7 +167,7 @@ export function ProfileForm({
       <button
         type="submit"
         disabled={pending || uploading}
-        className="rounded-lg bg-foreground px-5 py-2.5 font-medium text-background transition hover:opacity-90 disabled:opacity-60"
+        className="press panel-sm bg-comic-red px-6 py-3 font-bold text-white disabled:opacity-60"
       >
         {pending ? "Saving…" : uploading ? "Waiting for upload…" : submitLabel}
       </button>

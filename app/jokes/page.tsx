@@ -17,55 +17,57 @@ export default async function JokesPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
-      <header className="mb-8 flex items-end justify-between gap-4">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:py-12">
+      <Link
+        href="/"
+        className="text-sm font-semibold text-ink-soft underline underline-offset-2 hover:text-ink"
+      >
+        ← Back to the lineup
+      </Link>
+
+      <header className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hand-written jokes</h1>
-          <p className="mt-2 text-sm opacity-70">
-            The original set, written by people. For the AI captions you can
-            vote on, see{" "}
-            <Link href="/" className="underline">
-              the feed
-            </Link>
-            .
+          <h1 className="font-display text-3xl font-black sm:text-4xl">
+            Hand-written jokes
+          </h1>
+          <p className="mt-2 max-w-md text-sm text-ink-soft">
+            The original set, written by actual people. No voting here — that
+            happens on the AI captions in the lineup.
           </p>
         </div>
         <Link
           href={user ? "/jokes/new" : "/login"}
-          className="shrink-0 rounded-lg border border-black/15 px-4 py-2 text-sm font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+          className="press panel-sm shrink-0 bg-comic-yellow px-4 py-2 font-bold text-ink-fixed"
         >
-          {user ? "Add a joke" : "Sign in to add"}
+          {user ? "+ Add a joke" : "Sign in to add"}
         </Link>
       </header>
 
       {error ? (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/5 p-4">
-          <h2 className="font-semibold text-red-600 dark:text-red-400">
-            Could not load jokes
-          </h2>
-          <p className="mt-1 font-mono text-sm opacity-80">{error}</p>
+        <div className="panel mt-7 bg-red-tint p-5">
+          <h2 className="font-display text-lg font-black">Could not load jokes</h2>
+          <p className="mt-1 font-mono text-sm text-ink-soft">{error}</p>
         </div>
       ) : (
-        <ul className="space-y-4">
+        <ul className="mt-7 space-y-4">
           {jokes.map((joke) => (
-            <li
-              key={joke.id}
-              className="rounded-lg border border-black/10 p-5 dark:border-white/15"
-            >
-              <div className="flex items-center gap-2">
+            <li key={joke.id} className="panel panel-hover p-5">
+              <div className="flex flex-wrap items-center gap-2">
                 {joke.category && (
-                  <span className="text-xs font-medium uppercase tracking-wide opacity-60">
+                  <span className="rounded-full bg-blue-tint px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide">
                     {joke.category}
                   </span>
                 )}
                 {joke.user_id && (
-                  <span className="rounded bg-black/5 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide opacity-60 dark:bg-white/10">
+                  <span className="rounded-full bg-green-tint px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide">
                     Community
                   </span>
                 )}
               </div>
-              <p className="mt-1 font-medium">{joke.setup}</p>
-              <p className="mt-2 opacity-75">{joke.punchline}</p>
+              <p className="mt-2 font-display text-lg font-bold leading-snug">
+                {joke.setup}
+              </p>
+              <p className="mt-1.5 text-ink-soft">{joke.punchline}</p>
             </li>
           ))}
         </ul>

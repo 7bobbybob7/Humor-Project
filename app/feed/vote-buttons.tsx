@@ -22,6 +22,18 @@ export function VoteButtons({
   const [localVote, setLocalVote] = useState<number | undefined>(myVote);
   const [error, setError] = useState<string | null>(null);
 
+  // Re-sync when the server sends a different score, which happens after
+  // router.refresh() or when someone else votes. Without this the optimistic
+  // value sticks and the displayed count drifts from the database.
+  const [syncedScore, setSyncedScore] = useState(score);
+  const [syncedVote, setSyncedVote] = useState(myVote);
+  if (score !== syncedScore || myVote !== syncedVote) {
+    setSyncedScore(score);
+    setSyncedVote(myVote);
+    setLocalScore(score);
+    setLocalVote(myVote);
+  }
+
   function vote(value: 1 | -1) {
     if (!signedIn) {
       router.push("/login");
@@ -50,46 +62,59 @@ export function VoteButtons({
   }
 
   const base =
-    "flex h-7 w-7 items-center justify-center rounded-md border text-sm transition disabled:opacity-50";
+    "press flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-sm font-bold leading-none transition disabled:opacity-50";
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex shrink-0 flex-col items-center gap-1.5">
       <button
         onClick={() => vote(1)}
         disabled={pending}
-        aria-label="Upvote"
+        aria-label={signedIn ? "Upvote this caption" : "Sign in to vote"}
         aria-pressed={localVote === 1}
         title={signedIn ? "Upvote" : "Sign in to vote"}
         className={`${base} ${
           localVote === 1
-            ? "border-green-600 bg-green-600/15 text-green-700 dark:text-green-400"
-            : "border-black/15 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+            ? "bg-comic-green text-white"
+            : "bg-paper-raised text-ink hover:bg-green-tint"
         }`}
       >
         ▲
       </button>
 
-      <span className="min-w-6 text-center text-sm font-semibold tabular-nums">
+      <span
+        className="font-display text-lg font-black tabular-nums"
+        aria-live="polite"
+      >
         {localScore}
       </span>
 
       <button
         onClick={() => vote(-1)}
         disabled={pending}
-        aria-label="Downvote"
+        aria-label={signedIn ? "Downvote this caption" : "Sign in to vote"}
         aria-pressed={localVote === -1}
         title={signedIn ? "Downvote" : "Sign in to vote"}
         className={`${base} ${
           localVote === -1
-            ? "border-red-600 bg-red-600/15 text-red-700 dark:text-red-400"
-            : "border-black/15 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+            ? "bg-comic-red text-white"
+            : "bg-paper-raised text-ink hover:bg-red-tint"
         }`}
       >
         ▼
       </button>
 
+      {!signedIn && (
+        <span
+          title="Sign in to rate"
+          aria-hidden
+          className="mt-0.5 text-[11px] leading-none text-ink-soft"
+        >
+          🔒
+        </span>
+      )}
+
       {error && (
-        <span className="w-24 text-center text-[10px] leading-tight text-red-600 dark:text-red-400">
+        <span className="mt-0.5 w-20 rounded bg-red-tint px-1 py-0.5 text-center text-[10px] font-semibold leading-tight text-ink">
           {error}
         </span>
       )}
