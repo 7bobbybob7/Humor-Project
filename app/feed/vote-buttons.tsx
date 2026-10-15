@@ -61,8 +61,11 @@ export function VoteButtons({
     });
   }
 
-  const base =
-    "press flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-sm font-bold leading-none transition disabled:opacity-50";
+  // Guests keep the arrows (they explain what the site does and route to
+  // login), but dimmed so the locked state reads before anyone clicks.
+  const base = `press flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-sm font-bold leading-none transition disabled:opacity-50${
+    signedIn ? "" : " opacity-55"
+  }`;
 
   return (
     <div className="flex shrink-0 flex-col items-center gap-1.5">
