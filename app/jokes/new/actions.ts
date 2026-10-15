@@ -24,6 +24,12 @@ export async function createJoke(
   if (!setup || !punchline) {
     return { error: "Setup and punchline are both required." };
   }
+  if (setup.length > 200 || punchline.length > 200) {
+    return { error: "Setup and punchline need to be 200 characters or fewer." };
+  }
+  if (category.length > 40) {
+    return { error: "Category needs to be 40 characters or fewer." };
+  }
 
   const { error } = await supabase.from("jokes").insert({
     setup,

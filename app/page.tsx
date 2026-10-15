@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCurrentUser, getProfile } from "@/lib/auth";
+import { getCurrentUser, getProfile, type Profile } from "@/lib/auth";
 import {
   getFeed,
   getLeadingTodayId,
@@ -39,22 +39,37 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   let authors: Author[] = [];
   let leadingId: number | null = null;
   let today: TodayStats = { captions: 0, votes: 0, players: 0 };
-  let profile = null;
+  let profile: Profile | null = null;
   let error: string | null = null;
 
-  try {
-    [generations, myVotes, authors, leadingId, today, profile] =
-      await Promise.all([
-        getFeed(active),
-        getMyVotes(),
-        getTopAuthors(),
-        getLeadingTodayId(),
-        getTodayStats(),
-        getProfile(),
-      ]);
-  } catch (e) {
-    error = e instanceof Error ? e.message : "Unknown error loading the lineup.";
+  // allSettled, not all: only the lineup itself is essential. With Promise.all
+  // a hiccup in the standings or the activity counter would blank the whole
+  // page even though the captions loaded fine.
+  const [feedR, votesR, authorsR, leadingR, todayR, profileR] =
+    await Promise.allSettled([
+      getFeed(active),
+      getMyVotes(),
+      getTopAuthors(),
+      getLeadingTodayId(),
+      getTodayStats(),
+      getProfile(),
+    ]);
+
+  if (feedR.status === "fulfilled") {
+    generations = feedR.value;
+  } else {
+    error =
+      feedR.reason instanceof Error
+        ? feedR.reason.message
+        : "Unknown error loading the lineup.";
   }
+
+  // Everything below degrades quietly: the section simply does not render.
+  if (votesR.status === "fulfilled") myVotes = votesR.value;
+  if (authorsR.status === "fulfilled") authors = authorsR.value;
+  if (leadingR.status === "fulfilled") leadingId = leadingR.value;
+  if (todayR.status === "fulfilled") today = todayR.value;
+  if (profileR.status === "fulfilled") profile = profileR.value;
 
   const myPoints = generations
     .filter((g) => profile && g.user_id === profile.id)

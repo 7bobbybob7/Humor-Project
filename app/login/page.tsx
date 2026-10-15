@@ -15,7 +15,9 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   if (await getCurrentUser()) redirect("/");
 
   const { error } = await searchParams;
-  const message = Array.isArray(error) ? error[0] : error;
+  const raw = Array.isArray(error) ? error[0] : error;
+  // Comes from the query string, so cap it before rendering.
+  const message = raw ? raw.slice(0, 200) : undefined;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 py-12">

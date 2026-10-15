@@ -14,9 +14,19 @@ const MODEL_CHAIN = [
 
 export const CAPTIONS_PER_RUN = 3;
 
-/** Transient conditions worth trying another model for. */
+/**
+ * Transient conditions worth trying another model for. A thrown error with no
+ * HTTP status is usually a network or timeout failure, which is also worth
+ * retrying on the next model rather than aborting the whole chain.
+ */
 function isRetryable(status: number | undefined): boolean {
-  return status === 503 || status === 429 || status === 500 || status === 504;
+  return (
+    status === undefined ||
+    status === 503 ||
+    status === 429 ||
+    status === 500 ||
+    status === 504
+  );
 }
 
 /** A model that is gone or not entitled for this key - skip it, don't retry. */

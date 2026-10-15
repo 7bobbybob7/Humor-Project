@@ -94,17 +94,29 @@ export async function getTopAuthors(limit = 5): Promise<Author[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("generations")
-    .select("author_first_name, score")
+    .select("user_id, author_first_name, score, created_at")
     .order("created_at", { ascending: false })
     .limit(500);
 
+  // Grouped by user_id, not by name. Two people called "Sam" are two entries,
+  // and someone who renamed themselves stays one entry even though their older
+  // rows still carry the old denormalized name. Rows arrive newest-first, so
+  // the first name seen for a user is their most recent one.
   const tally = new Map<string, Author>();
   for (const row of data ?? []) {
-    const name = (row.author_first_name as string | null)?.trim() || "anonymous";
-    const entry = tally.get(name) ?? { name, points: 0, captions: 0 };
-    entry.points += (row.score as number) ?? 0;
-    entry.captions += 1;
-    tally.set(name, entry);
+    const id = row.user_id as string;
+    if (!id) continue;
+    const existing = tally.get(id);
+    if (existing) {
+      existing.points += (row.score as number) ?? 0;
+      existing.captions += 1;
+    } else {
+      tally.set(id, {
+        name: (row.author_first_name as string | null)?.trim() || "anonymous",
+        points: (row.score as number) ?? 0,
+        captions: 1,
+      });
+    }
   }
 
   return [...tally.values()]
@@ -119,12 +131,11 @@ export async function getTopAuthors(limit = 5): Promise<Author[]> {
  */
 export async function getLeadingTodayId(): Promise<number | null> {
   const supabase = await createClient();
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
   const { data } = await supabase
     .from("generations")
     .select("id")
-    .gte("created_at", since)
+    .gte("created_at", startOfUtcDay())
     .gt("score", 0)
     .order("score", { ascending: false })
     .limit(1)
