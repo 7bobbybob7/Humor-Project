@@ -5,19 +5,33 @@ import { createClient } from "@/lib/supabase/client";
 
 export function GoogleButton() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function signIn() {
     setLoading(true);
+    setError(null);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      // Exactly /auth/callback, no query string.
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (error) setLoading(false);
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        // Exactly /auth/callback, no query string.
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      // On success the browser navigates to Google and this never runs.
+      if (oauthError) {
+        setError(oauthError.message);
+        setLoading(false);
+      }
+    } catch (e) {
+      // Previously the failure was swallowed and the button simply re-enabled,
+      // so a user whose sign-in could not start saw nothing happen at all.
+      setError(e instanceof Error ? e.message : "Could not reach Google.");
+      setLoading(false);
+    }
   }
 
   return (
+    <>
     <button
       onClick={signIn}
       disabled={loading}
@@ -31,5 +45,11 @@ export function GoogleButton() {
       </svg>
       {loading ? "Redirecting to Google…" : "Continue with Google"}
     </button>
+    {error && (
+      <p className="panel-sm mt-4 bg-red-tint px-4 py-3 text-sm font-semibold">
+        Could not start sign-in: {error}
+      </p>
+    )}
+    </>
   );
 }

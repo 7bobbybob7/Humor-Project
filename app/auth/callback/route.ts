@@ -13,11 +13,19 @@ import { isProfileComplete } from "@/lib/auth";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
 
-  // Behind Vercel's proxy the request origin is an internal host, so prefer
-  // the forwarded host when building absolute redirects.
+  // Behind Vercel's proxy the request origin can be an internal host, so the
+  // forwarded host is preferred when building absolute redirects. It is only
+  // trusted when it looks like one of our own deployments: the header is
+  // client-settable in principle, and every redirect below would otherwise
+  // happily send a freshly authenticated user to someone else's domain.
   const forwardedHost = request.headers.get("x-forwarded-host");
   const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
-  const base = forwardedHost ? `${forwardedProto}://${forwardedHost}` : origin;
+  const isOwnHost =
+    !!forwardedHost &&
+    /^(localhost(:\d+)?|127\.0\.0\.1(:\d+)?|[a-z0-9-]+(\.[a-z0-9-]+)*\.vercel\.app)$/i.test(
+      forwardedHost,
+    );
+  const base = isOwnHost ? `${forwardedProto}://${forwardedHost}` : origin;
 
   const providerError =
     searchParams.get("error_description") ?? searchParams.get("error");
