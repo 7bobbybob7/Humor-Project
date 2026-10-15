@@ -128,6 +128,7 @@ export function ProfileForm({
             name="first_name"
             defaultValue={profile?.first_name ?? ""}
             required
+            maxLength={40}
             className="w-full rounded-xl border-2 border-ink bg-paper-raised px-4 py-2.5 font-medium focus:outline-none focus:ring-4 focus:ring-comic-yellow"
           />
         </label>
@@ -138,6 +139,7 @@ export function ProfileForm({
             name="last_name"
             defaultValue={profile?.last_name ?? ""}
             required
+            maxLength={40}
             className="w-full rounded-xl border-2 border-ink bg-paper-raised px-4 py-2.5 font-medium focus:outline-none focus:ring-4 focus:ring-comic-yellow"
           />
         </label>

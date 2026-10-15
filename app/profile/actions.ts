@@ -29,6 +29,9 @@ export async function updateProfile(
   if (!firstName || !lastName) {
     return { error: "First name and last name are both required." };
   }
+  if (firstName.length > 40 || lastName.length > 40) {
+    return { error: "Names need to be 40 characters or fewer." };
+  }
 
   const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
 
@@ -39,15 +42,23 @@ export async function updateProfile(
     return { error: "That photo could not be verified. Try uploading it again." };
   }
 
+  // upsert, not update. An .update() against a row that does not exist matches
+  // zero rows and reports no error, so the save would appear to succeed while
+  // writing nothing - and requireCompleteProfile would then bounce the user
+  // back to /onboarding forever. This can happen if the auth.users trigger
+  // did not fire. Both the insert and update RLS policies check auth.uid() = id.
   const { error } = await supabase
     .from("profiles")
-    .update({
-      first_name: firstName,
-      last_name: lastName,
-      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
+    .upsert(
+      {
+        id: user.id,
+        first_name: firstName,
+        last_name: lastName,
+        ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
 
   if (error) {
     console.error("[profile update failed]", {
@@ -64,7 +75,13 @@ export async function updateProfile(
   revalidatePath("/");
 
   const redirectTo = formData.get("redirect_to");
-  if (typeof redirectTo === "string" && redirectTo.startsWith("/")) {
+  // "//evil.com" also starts with "/" and is a protocol-relative URL that
+  // leaves the site, so same-origin paths must start with exactly one slash.
+  if (
+    typeof redirectTo === "string" &&
+    redirectTo.startsWith("/") &&
+    !redirectTo.startsWith("//")
+  ) {
     redirect(redirectTo);
   }
 
