@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { generateCaptions } from "@/lib/gemini";
+import { runGeneration } from "@/lib/pipeline";
 
 export type GenerateState = { error?: string };
 
@@ -36,7 +36,7 @@ export async function generate(
 
   let result;
   try {
-    result = await generateCaptions(topic);
+    result = await runGeneration(user.id, topic);
   } catch (e) {
     return {
       error: e instanceof Error ? e.message : "The model call failed.",
@@ -48,8 +48,9 @@ export async function generate(
       user_id: user.id,
       author_first_name: profile?.first_name ?? null,
       prompt: topic,
-      system_prompt: result.prompt,
+      system_prompt: result.systemPrompt,
       model: result.model,
+      request_id: result.requestId,
       caption,
     })),
   );
