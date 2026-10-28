@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { runGeneration } from "@/lib/pipeline";
+import { markRequestFailed, runGeneration } from "@/lib/pipeline";
 
 export type GenerateState = { error?: string };
 
@@ -55,7 +55,13 @@ export async function generate(
     })),
   );
 
-  if (error) return { error: `Could not save the captions: ${error.message}` };
+  if (error) {
+    // The pipeline already marked the request succeeded when the model
+    // answered. The captions never landed, so correct that rather than
+    // leaving a request claiming captions that do not exist.
+    await markRequestFailed(result.requestId, `Saving captions failed: ${error.message}`);
+    return { error: `Could not save the captions: ${error.message}` };
+  }
 
   revalidatePath("/");
   redirect(`/?sort=new&posted=${result.captions.length}`);

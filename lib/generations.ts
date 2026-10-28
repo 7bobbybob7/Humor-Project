@@ -48,8 +48,10 @@ export async function getFeed(sort: FeedSort = "top"): Promise<Generation[]> {
 /**
  * The signed-in user's own votes, keyed by generation id.
  *
- * No filter on user_id is needed: the RLS policy on `votes` only exposes rows
- * belonging to the caller, so this returns nothing for anonymous visitors.
+ * Filtered on user_id explicitly. It used to lean on RLS to do the scoping,
+ * which stopped being true when the admin console widened the select policy
+ * on `votes` to `auth.uid() = user_id or is_superadmin()`: an admin then read
+ * everyone's votes and saw other people's arrows lit up as their own.
  */
 export async function getMyVotes(): Promise<Record<number, number>> {
   const supabase = await createClient();
@@ -58,7 +60,10 @@ export async function getMyVotes(): Promise<Record<number, number>> {
   } = await supabase.auth.getUser();
   if (!user) return {};
 
-  const { data, error } = await supabase.from("votes").select("generation_id, value");
+  const { data, error } = await supabase
+    .from("votes")
+    .select("generation_id, value")
+    .eq("user_id", user.id);
   if (error) return {};
 
   return Object.fromEntries(

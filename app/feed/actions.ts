@@ -39,11 +39,16 @@ export async function castVote(
     return { error: "You can't vote on your own caption." };
   }
 
-  // RLS limits this read to the caller's own vote.
+  // Scoped to the caller explicitly rather than leaning on RLS. The admin
+  // console widened the select policy on `votes` to include superadmins, so
+  // an admin reading without this filter would pick up a stranger's vote row
+  // and then update or delete it by id - a write the own-row update policy
+  // silently matches zero rows for, reporting success while doing nothing.
   const { data: existing } = await supabase
     .from("votes")
     .select("id, value")
     .eq("generation_id", generationId)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   if (existing && existing.value === value) {

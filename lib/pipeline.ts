@@ -54,7 +54,7 @@ function renderPrompt(
   steps: StepRow[],
   vars: { topic: string; count: number; terms: string; examples: string },
 ): string {
-  return steps
+  return [...steps]
     .sort((a, b) => a.step_order - b.step_order)
     .map((s) =>
       s.template
@@ -134,7 +134,7 @@ export async function runGeneration(
       .select("id, model_key")
       .eq("is_active", true)
       .order("priority", { ascending: true }),
-    supabase.from("terms").select("term, kind").eq("is_active", true),
+    supabase.from("terms").select("term, kind").eq("is_active", true).limit(60),
   ]);
 
   const chainId = pickChain(mixRes.data ?? []);
@@ -182,7 +182,7 @@ export async function runGeneration(
     .filter(Boolean)
     .join(" ");
 
-  const systemPrompt =
+  const rendered =
     steps.length > 0
       ? renderPrompt(steps, {
           topic,
@@ -190,7 +190,11 @@ export async function runGeneration(
           terms: termsText,
           examples: examplesText,
         })
-      : fallbackPrompt(topic);
+      : "";
+
+  // A chain whose steps are all blank renders to nothing. Sending an empty
+  // prompt would get an empty or nonsense answer, so fall back instead.
+  const systemPrompt = rendered.trim() ? rendered : fallbackPrompt(topic);
 
   // ---- open a request row -------------------------------------------------
   const { data: requestRow } = await supabase
@@ -311,4 +315,23 @@ export async function runGeneration(
   throw new Error(
     `Every caption model was unavailable. Gemini is likely under load — try again in a moment. (${lastError.slice(0, 140)})`,
   );
+}
+
+/**
+ * Marks a request failed after the fact.
+ *
+ * runGeneration marks a request succeeded as soon as the model returns, but
+ * the captions are saved by the caller afterwards. If that save fails the
+ * request would otherwise still read "succeeded" while no captions exist.
+ */
+export async function markRequestFailed(
+  requestId: number | null,
+  reason: string,
+): Promise<void> {
+  if (!requestId) return;
+  const supabase = await createClient();
+  await supabase
+    .from("generation_requests")
+    .update({ status: "failed", error: reason.slice(0, 500), captions_created: 0 })
+    .eq("id", requestId);
 }
