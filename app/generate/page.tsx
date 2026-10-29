@@ -5,10 +5,12 @@ import { GenerateForm } from "./generate-form";
 
 export const dynamic = "force-dynamic";
 
-// The model call runs inside this page's Server Action. Vercel's default
-// function timeout is 10s; the fallback chain can burn a few seconds on a 503
-// before it reaches a model that answers.
-export const maxDuration = 30;
+// The model call runs inside this page's Server Action. The pipeline caps each
+// attempt and stops starting new ones at 30s, so this only has to sit
+// comfortably above that: the chain should always run out on its own terms and
+// return a message, rather than being killed mid-call, which reaches the
+// browser as the generic error page instead.
+export const maxDuration = 45;
 
 /**
  * Protected route. proxy.ts redirects signed-out visitors to /login, and the

@@ -27,12 +27,19 @@ export async function generate(
   }
 
   // Copied onto each row so the public feed can show attribution without
-  // needing read access to the profiles table.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("first_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  // needing read access to the profiles table. Attribution is cosmetic, so
+  // losing it must not sink an otherwise good generation.
+  let authorFirstName: string | null = null;
+  try {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name")
+      .eq("id", user.id)
+      .maybeSingle();
+    authorFirstName = profile?.first_name ?? null;
+  } catch {
+    // Leave the captions unattributed.
+  }
 
   let result;
   try {
@@ -43,24 +50,34 @@ export async function generate(
     };
   }
 
-  const { error } = await supabase.from("generations").insert(
-    result.captions.map((caption) => ({
-      user_id: user.id,
-      author_first_name: profile?.first_name ?? null,
-      prompt: topic,
-      system_prompt: result.systemPrompt,
-      model: result.model,
-      request_id: result.requestId,
-      caption,
-    })),
-  );
+  // Anything thrown past this point reaches the browser as the generic error
+  // page rather than a message this form can show, so the save is guarded as
+  // well as checked. redirect() stays outside: it works by throwing.
+  try {
+    const { error } = await supabase.from("generations").insert(
+      result.captions.map((caption) => ({
+        user_id: user.id,
+        author_first_name: authorFirstName,
+        prompt: topic,
+        system_prompt: result.systemPrompt,
+        model: result.model,
+        request_id: result.requestId,
+        caption,
+      })),
+    );
 
-  if (error) {
-    // The pipeline already marked the request succeeded when the model
-    // answered. The captions never landed, so correct that rather than
-    // leaving a request claiming captions that do not exist.
-    await markRequestFailed(result.requestId, `Saving captions failed: ${error.message}`);
-    return { error: `Could not save the captions: ${error.message}` };
+    if (error) {
+      // The pipeline already marked the request succeeded when the model
+      // answered. The captions never landed, so correct that rather than
+      // leaving a request claiming captions that do not exist.
+      await markRequestFailed(result.requestId, `Saving captions failed: ${error.message}`);
+      return { error: `Could not save the captions: ${error.message}` };
+    }
+  } catch (e) {
+    const reason =
+      e instanceof Error ? e.message : "The database was unreachable.";
+    await markRequestFailed(result.requestId, `Saving captions failed: ${reason}`);
+    return { error: `Could not save the captions: ${reason}` };
   }
 
   revalidatePath("/");
